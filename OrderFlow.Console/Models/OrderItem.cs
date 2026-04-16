@@ -6,6 +6,8 @@ public class OrderItem
     public int Quantity { get; set; }
     public decimal TotalPrice => Product.Price * Quantity;
 
+    public OrderItem() { }
+
     public OrderItem(Product product, int quantity)
     {
         Product = product;

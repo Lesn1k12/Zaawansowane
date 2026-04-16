@@ -6,6 +6,8 @@ public class Product
     public decimal Price { get; set; }
     public string Category { get; set; }
 
+    public Product() { }
+
     public Product(string name, decimal price, string category)
     {
         Name = name;

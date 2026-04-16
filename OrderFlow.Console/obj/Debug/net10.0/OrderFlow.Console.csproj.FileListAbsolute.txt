@@ -1,0 +1,15 @@
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/bin/Debug/net10.0/OrderFlow.Console
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/bin/Debug/net10.0/OrderFlow.Console.deps.json
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/bin/Debug/net10.0/OrderFlow.Console.runtimeconfig.json
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/bin/Debug/net10.0/OrderFlow.Console.dll
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/bin/Debug/net10.0/OrderFlow.Console.pdb
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/obj/Debug/net10.0/OrderFlow.Console.GeneratedMSBuildEditorConfig.editorconfig
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/obj/Debug/net10.0/OrderFlow.Console.AssemblyInfoInputs.cache
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/obj/Debug/net10.0/OrderFlow.Console.AssemblyInfo.cs
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/obj/Debug/net10.0/OrderFlow.Console.csproj.CoreCompileInputs.cache
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/obj/Debug/net10.0/OrderFlow.Console.sourcelink.json
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/obj/Debug/net10.0/OrderFlow.Console.dll
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/obj/Debug/net10.0/refint/OrderFlow.Console.dll
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/obj/Debug/net10.0/OrderFlow.Console.pdb
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/obj/Debug/net10.0/OrderFlow.Console.genruntimeconfig.cache
+/home/hikky/Desktop/lesnik/Zaawansowane/OrderFlow.Console/obj/Debug/net10.0/ref/OrderFlow.Console.dll

@@ -6,6 +6,8 @@ public class Customer
     public string City { get; set; }
     public bool IsVIP { get; set; }
 
+    public Customer() { }
+
     public Customer(string name, string city, bool isVIP)
     {
         Name = name;
