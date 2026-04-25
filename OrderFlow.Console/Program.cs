@@ -3,6 +3,7 @@ using OrderFlow.Console.Data;
 using OrderFlow.Console.Events;
 using OrderFlow.Console.Models;
 using OrderFlow.Console.Persistence;
+using OrderFlow.Console.Reports;
 using OrderFlow.Console.Services;
 
 System.Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -172,3 +173,46 @@ System.Console.WriteLine($"  Errors logged  : {safeStats.ProcessingErrors.Count}
 System.Console.WriteLine("  Orders per status:");
 foreach (var kv in safeStats.OrdersPerStatus.OrderBy(k => k.Key))
     System.Console.WriteLine($"    {kv.Key,-12}: {kv.Value}");
+
+System.Console.WriteLine("\n=== TASK 8 — LINQ to XML Report ===\n");
+
+var reportBuilder = new XmlReportBuilder();
+var report        = reportBuilder.BuildReport(SampleData.Orders);
+
+await reportBuilder.SaveReportAsync(report, "data/report.xml");
+System.Console.WriteLine("Report saved to data/report.xml");
+System.Console.WriteLine(report.ToString());
+
+var highValueIds = await reportBuilder.FindHighValueOrderIdsAsync("data/report.xml", 1000m);
+System.Console.WriteLine($"\nOrder IDs with total > 1000: {string.Join(", ", highValueIds)}");
+
+System.Console.WriteLine("\n=== TASK 9 — Inbox Watcher ===\n");
+
+var inboxPipeline = new OrderPipeline();
+inboxPipeline.StatusChanged += ConsoleLogger.OnStatusChanged;
+inboxPipeline.StatusChanged += EmailNotifier.OnStatusChanged;
+
+using var watcher = new InboxWatcher("inbox", inboxPipeline);
+System.Console.WriteLine("Watcher started on inbox/. Dropping 3 test files...\n");
+
+var inboxRepo = new OrderRepository();
+for (int wave = 1; wave <= 3; wave++)
+{
+    await Task.Delay(3000);
+    var waveOrders = new List<Order>
+    {
+        new(SampleData.Customers[wave % SampleData.Customers.Count],
+            DateTime.Today, OrderStatus.New,
+            new List<OrderItem> { new(SampleData.Products[wave % SampleData.Products.Count], wave) }),
+
+        new(SampleData.Customers[(wave + 1) % SampleData.Customers.Count],
+            DateTime.Today, OrderStatus.New,
+            new List<OrderItem> { new(SampleData.Products[(wave + 2) % SampleData.Products.Count], 1) }),
+    };
+    var inboxFile = Path.Combine("inbox", $"wave{wave}.json");
+    await inboxRepo.SaveToJsonAsync(waveOrders, inboxFile);
+    System.Console.WriteLine($"[DEMO] Dropped {inboxFile} ({waveOrders.Count} orders)");
+}
+
+await Task.Delay(2000);
+System.Console.WriteLine("\nWatcher demo complete.");

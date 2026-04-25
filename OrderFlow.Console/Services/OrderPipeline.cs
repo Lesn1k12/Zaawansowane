@@ -25,6 +25,8 @@ public class OrderPipeline
         Transition(order, OrderStatus.Completed);
     }
 
+    public Task ProcessOrderAsync(Order order) => Task.Run(() => ProcessOrder(order));
+
     private void Transition(Order order, OrderStatus newStatus)
     {
         var old = order.Status;
