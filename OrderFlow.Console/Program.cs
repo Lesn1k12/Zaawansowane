@@ -216,3 +216,79 @@ for (int wave = 1; wave <= 3; wave++)
 
 await Task.Delay(2000);
 System.Console.WriteLine("\nWatcher demo complete.");
+
+// ═══════════════════════════════════════════════════════════════════════════
+System.Console.WriteLine("\n=== TASK 10 — Entity Framework Core 10 + SQLite ===\n");
+
+await using var db = new OrderFlowContext();
+
+// ── Migracje + seeding ────────────────────────────────────────────────────
+System.Console.WriteLine("[EF] Stosowanie migracji...");
+await db.Database.MigrateAsync();
+
+System.Console.WriteLine("[EF] Seeding bazy danych...");
+await DatabaseSeeder.SeedAsync(db);
+
+// ── CRUD ──────────────────────────────────────────────────────────────────
+System.Console.WriteLine("\n--- CRUD ---");
+
+// CREATE: nowe zamówienie z 2 pozycjami
+var firstCustId  = await db.Customers.Select(c => c.Id).FirstAsync();
+var productIds   = await db.Products.Select(p => p.Id).Take(2).ToListAsync();
+var createdOrder = await EfOrderService.CreateOrderAsync(
+    db, firstCustId, (productIds[0], 1), (productIds[1], 3));
+
+// UPDATE: zmiana statusu + notatka
+await EfOrderService.UpdateOrderAsync(db, createdOrder.Id, "Zamówienie pilnie przetwarzane");
+
+// DELETE: usuń wszystkie Cancelled
+await EfOrderService.DeleteCancelledOrdersAsync(db);
+
+// ── Transakcja ────────────────────────────────────────────────────────────
+System.Console.WriteLine("\n--- Transakcja: ProcessOrderAsync ---");
+
+// Scenariusz A — sukces (zamówienie ze statusem New/Validated + jest stock)
+var orderToProcess = await db.Orders
+    .Include(o => o.Items).ThenInclude(oi => oi.Product)
+    .FirstOrDefaultAsync(o => o.Status == OrderStatus.New
+                           || o.Status == OrderStatus.Validated);
+
+if (orderToProcess != null)
+{
+    System.Console.WriteLine($"[TX] Przetwarzam Order Id={orderToProcess.Id}...");
+    try { await EfOrderService.ProcessOrderAsync(db, orderToProcess.Id); }
+    catch (Exception ex) { System.Console.WriteLine($"[TX] Błąd: {ex.Message}"); }
+}
+
+// Scenariusz B — rollback (zerujemy stock, by wymusić wyjątek)
+var demoOrder = await db.Orders
+    .Include(o => o.Items).ThenInclude(oi => oi.Product)
+    .FirstOrDefaultAsync(o => o.Status == OrderStatus.New);
+
+if (demoOrder != null)
+{
+    System.Console.WriteLine("\n[TX] Demonstracja rollbacku — zerujemy stock...");
+    demoOrder.Items.First().Product.Stock = 0;
+    await db.SaveChangesAsync();
+
+    try { await EfOrderService.ProcessOrderAsync(db, demoOrder.Id); }
+    catch (InvalidOperationException ex)
+    {
+        System.Console.WriteLine($"[TX] Rollback zakończony poprawnie. Powód: {ex.Message}");
+    }
+}
+
+// ── Zaawansowane zapytania LINQ ───────────────────────────────────────────
+System.Console.WriteLine("\n--- Zaawansowane zapytania LINQ (IQueryable) ---");
+
+await EfLinqQueries.PrintVipOrdersAbove500Async(db);
+await EfLinqQueries.PrintTop3CustomersBySpendingAsync(db);
+await EfLinqQueries.PrintAvgOrderValuePerCityAsync(db);
+await EfLinqQueries.PrintNeverOrderedProductsAsync(db);
+
+// Q5a — filtr: Completed, dowolna kwota
+await EfLinqQueries.PrintDynamicFilterAsync(db, OrderStatus.Completed, minAmount: null);
+// Q5b — filtr: dowolny status, minimum 100 PLN
+await EfLinqQueries.PrintDynamicFilterAsync(db, status: null, minAmount: 100m);
+
+System.Console.WriteLine("\n=== EF Core demo zakończone. ===");
