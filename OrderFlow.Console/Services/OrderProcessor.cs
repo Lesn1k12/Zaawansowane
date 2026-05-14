@@ -8,6 +8,10 @@ public class OrderProcessor
 
     public OrderProcessor(List<Order> orders) => _orders = orders;
 
+    public List<Order> FilterOrders(Predicate<Order> predicate) => _orders.FindAll(predicate);
+
+    public decimal CalculateTotalAmount(IEnumerable<Order> orders) => orders.Sum(o => o.TotalAmount);
+
     public void Run()
     {
         System.Console.WriteLine("\n=== TASK 3 — Action, Func, Predicate ===\n");
