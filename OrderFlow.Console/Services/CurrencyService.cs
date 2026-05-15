@@ -9,15 +9,20 @@ public class CurrencyService : ICurrencyService
     private const string BaseUrl = "https://api.nbp.pl/api/exchangerates/rates/A";
 
     private readonly HttpClient _http;
+    private readonly Dictionary<string, decimal> _cache = new();
 
     public CurrencyService(HttpClient http) => _http = http;
 
     public async Task<decimal?> GetRateAsync(string currencyCode)
     {
-        if (currencyCode.Equals("PLN", StringComparison.OrdinalIgnoreCase))
-            return 1.0m;
+        var key = currencyCode.ToUpperInvariant();
 
-        var url = $"{BaseUrl}/{currencyCode.ToUpperInvariant()}/?format=json";
+        if (key == "PLN") return 1.0m;
+
+        if (_cache.TryGetValue(key, out var cached))
+            return cached;
+
+        var url = $"{BaseUrl}/{key}/?format=json";
         var response = await _http.GetAsync(url);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
@@ -29,7 +34,12 @@ public class CurrencyService : ICurrencyService
                 (int)response.StatusCode);
 
         var data = await response.Content.ReadFromJsonAsync<NbpResponse>();
-        return data?.Rates.FirstOrDefault()?.Mid;
+        var mid  = data?.Rates.FirstOrDefault()?.Mid;
+
+        if (mid.HasValue)
+            _cache[key] = mid.Value;
+
+        return mid;
     }
 
     public async Task<decimal> ConvertAsync(decimal amount, string fromCurrency, string toCurrency)

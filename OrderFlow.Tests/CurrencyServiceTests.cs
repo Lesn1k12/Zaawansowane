@@ -115,6 +115,26 @@ public class CurrencyServiceTests
         Assert.Contains("format=json", url);
     }
 
+    // ── Test 7: Cache — second call must not hit the network ──────────────────
+
+    [Fact]
+    public async Task GetRateAsync_CalledTwiceForSameCode_OnlyOneHttpRequestIsMade()
+    {
+        // Arrange
+        var handler = new TestHttpMessageHandler(
+            _ => TestHttpMessageHandler.Json(NbpJson("USD", 3.92m)));
+        var sut = Build(handler);
+
+        // Act
+        decimal? first  = await sut.GetRateAsync("USD");
+        decimal? second = await sut.GetRateAsync("USD"); // must be served from cache
+
+        // Assert
+        Assert.Equal(3.92m, first);
+        Assert.Equal(3.92m, second);
+        Assert.Equal(1, handler.CallCount); // handler fired exactly once
+    }
+
     // ── Test 6: ConvertAsync — cross-currency via PLN base ────────────────────
 
     [Fact]
