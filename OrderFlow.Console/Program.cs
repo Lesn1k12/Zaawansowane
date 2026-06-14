@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 using OrderFlow.Console.Data;
 using OrderFlow.Console.Events;
 using OrderFlow.Console.Models;
@@ -292,3 +293,32 @@ await EfLinqQueries.PrintDynamicFilterAsync(db, OrderStatus.Completed, minAmount
 await EfLinqQueries.PrintDynamicFilterAsync(db, status: null, minAmount: 100m);
 
 System.Console.WriteLine("\n=== EF Core demo zakończone. ===");
+
+// ═══════════════════════════════════════════════════════════════════════════
+System.Console.WriteLine("\n=== LAB 5 — Currency Conversion (NBP API) ===\n");
+
+var httpClient        = new HttpClient();
+var currencyService   = new CurrencyService(httpClient);
+var currencyConverter = new OrderCurrencyConverter(currencyService);
+
+var ordersForConversion = await db.Orders
+    .Include(o => o.Customer)
+    .Include(o => o.Items).ThenInclude(oi => oi.Product)
+    .Take(5)
+    .ToListAsync();
+
+System.Console.WriteLine($"{"Customer",-20} {"PLN",12} {"USD",12} {"EUR",12}");
+System.Console.WriteLine(new string('-', 60));
+
+foreach (var order in ordersForConversion)
+{
+    var usd = await currencyConverter.ConvertOrderTotalAsync(order, "USD");
+    var eur = await currencyConverter.ConvertOrderTotalAsync(order, "EUR");
+
+    System.Console.WriteLine(
+        $"{order.Customer.Name,-20} {order.TotalAmount,12:F2} " +
+        $"{(usd.HasValue ? usd.Value.ToString("F2") : "N/A"),12} " +
+        $"{(eur.HasValue ? eur.Value.ToString("F2") : "N/A"),12}");
+}
+
+System.Console.WriteLine("\n=== Currency conversion zakończone. ===");

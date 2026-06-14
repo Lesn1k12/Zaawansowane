@@ -1,3 +1,4 @@
+using Xunit;
 using OrderFlow.Console.Models;
 using OrderFlow.Console.Services;
 

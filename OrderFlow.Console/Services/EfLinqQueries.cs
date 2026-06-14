@@ -123,7 +123,7 @@ public static class EfLinqQueries
         OrderStatus? status,
         decimal? minAmount)
     {
-        var query = baseQuery
+        IQueryable<Order> query = baseQuery
             .Include(o => o.Customer)
             .Include(o => o.Items)
                 .ThenInclude(oi => oi.Product);

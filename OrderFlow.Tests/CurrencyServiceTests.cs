@@ -1,3 +1,4 @@
+using Xunit;
 using System.Net;
 using OrderFlow.Console.Services;
 using OrderFlow.Tests.Helpers;
